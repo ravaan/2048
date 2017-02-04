@@ -160,9 +160,10 @@ public class GameManager : MonoBehaviour
 
             if (!CanMove())
                 GameOver();
-            else
-                state = GameState.Playing;
         }
+
+        state = GameState.Playing;
+        StopAllCoroutines();
     }
 
     public void Move(MoveDirection md)
@@ -229,6 +230,7 @@ public class GameManager : MonoBehaviour
             {
                 lineOfTiles[i].Number *= 2;
                 lineOfTiles[i + 1].Number = 0;
+                lineOfTiles[i].PlayMergeAnimation();
                 lineOfTiles[i].mergedThisTurn = true;
                 ScoreTracker.Instance.Score += lineOfTiles[i].Number;
                 if (lineOfTiles[i].Number == 2048)
@@ -261,6 +263,7 @@ public class GameManager : MonoBehaviour
             {
                 lineOfTiles[i].Number *= 2;
                 lineOfTiles[i - 1].Number = 0;
+                lineOfTiles[i].PlayMergeAnimation();
                 lineOfTiles[i].mergedThisTurn = true;
                 ScoreTracker.Instance.Score += lineOfTiles[i].Number;
                 if (lineOfTiles[i].Number == 2048)
@@ -288,6 +291,10 @@ public class GameManager : MonoBehaviour
                 emptyTiles[indexForNewNumber].Number = 4;
             else
                 emptyTiles[indexForNewNumber].Number = 2;
+
+            //Call Appear Animation
+            emptyTiles[indexForNewNumber].PlayAppearAnimation();
+
             emptyTiles.RemoveAt(indexForNewNumber);
             Debug.Log("Tiles Generated");
         }

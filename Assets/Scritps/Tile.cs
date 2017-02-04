@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Tile : MonoBehaviour {
+public class Tile : MonoBehaviour
+{
 
     public bool mergedThisTurn = false;
 
@@ -32,11 +33,23 @@ public class Tile : MonoBehaviour {
 
     private Text tileText;
     private Image tileImage;
+    private Animator anim;
 
     void Awake()
     {
+        anim = GetComponent<Animator>();
         tileText = GetComponentInChildren<Text>();
         tileImage = transform.Find("NumberedTile").GetComponent<Image>();
+    }
+
+    public void PlayMergeAnimation()
+    {
+        anim.SetTrigger("Merge");
+    }
+
+    public void PlayAppearAnimation()
+    {
+        anim.SetTrigger("Appear");
     }
 
     void ApplyStyleFromHolder(int index)
