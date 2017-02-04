@@ -4,8 +4,22 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+public enum GameState
+{
+    Playing,
+    GameOver,
+    WaitingForMoveToEnd
+}
+
 public class GameManager : MonoBehaviour
 {
+
+    public GameState state;
+    [Range(0, 2f)]
+    public float delay;
+    private bool moveMade;
+    private bool[] lineMoveComplete = new bool[4] { true, true, true, true };
+
     public GameObject youWonText;
     public GameObject gameOverText;
     public Text gameOverScoreText;
@@ -91,33 +105,98 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    IEnumerator MoveOneLineUpIndexCoroutine(Tile[] line, int index)
+    {
+        lineMoveComplete[index] = false;
+        while (MakeOneMoveUpIndex(line))
+        {
+            moveMade = true;
+            yield return new WaitForSeconds(delay);
+        }
+        lineMoveComplete[index] = true;
+    }
+
+    IEnumerator MoveOneLineDownIndexCoroutine(Tile[] line, int index)
+    {
+        lineMoveComplete[index] = false;
+        while (MakeOneMoveDownIndex(line))
+        {
+            moveMade = true;
+            yield return new WaitForSeconds(delay);
+        }
+        lineMoveComplete[index] = true;
+    }
+
+    IEnumerator MoveCoroutine(MoveDirection md)
+    {
+        state = GameState.WaitingForMoveToEnd;
+        switch(md)
+        {
+            case MoveDirection.Down:
+                for (int i = 0; i < columns.Count; i++)
+                    StartCoroutine(MoveOneLineUpIndexCoroutine(columns[i], i));
+                break;
+            case MoveDirection.Left:
+                for (int i = 0; i < rows.Count; i++)
+                    StartCoroutine(MoveOneLineDownIndexCoroutine(rows[i], i));
+                break;
+            case MoveDirection.Up:
+                for (int i = 0; i < columns.Count; i++)
+                    StartCoroutine(MoveOneLineDownIndexCoroutine(columns[i], i));
+                break;
+            case MoveDirection.Right:
+                for (int i = 0; i < rows.Count; i++)
+                    StartCoroutine(MoveOneLineUpIndexCoroutine(rows[i], i));
+                break;
+        }
+
+        while (!(lineMoveComplete[0] && lineMoveComplete[1] && lineMoveComplete[2] && lineMoveComplete[3]))
+            yield return null;
+
+        if (moveMade)
+        {
+            UpdateEmptyTiles();
+            Generate();
+
+            if (!CanMove())
+                GameOver();
+            else
+                state = GameState.Playing;
+        }
+    }
+
     public void Move(MoveDirection md)
     {
         Debug.Log(md.ToString() + " move.");
 
-        bool moveMade = false;
+        moveMade = false;
         ResetMergedFlags();
+        if (delay > 0)
+            StartCoroutine(MoveCoroutine(md));
+        else
+        {
 
-        for (int i = 0; i < rows.Count; i++)
-            switch (md)
-            {
-                case MoveDirection.Down:
-                    while (MakeOneMoveUpIndex(columns[i]))
-                        moveMade = true;
-                    break;
-                case MoveDirection.Right:
-                    while (MakeOneMoveUpIndex(rows[i]))
-                        moveMade = true;
-                    break;
-                case MoveDirection.Up:
-                    while (MakeOneMoveDownIndex(columns[i]))
-                        moveMade = true;
-                    break;
-                case MoveDirection.Left:
-                    while (MakeOneMoveDownIndex(rows[i]))
-                        moveMade = true;
-                    break;
-            }
+            for (int i = 0; i < rows.Count; i++)
+                switch (md)
+                {
+                    case MoveDirection.Down:
+                        while (MakeOneMoveUpIndex(columns[i]))
+                            moveMade = true;
+                        break;
+                    case MoveDirection.Right:
+                        while (MakeOneMoveUpIndex(rows[i]))
+                            moveMade = true;
+                        break;
+                    case MoveDirection.Up:
+                        while (MakeOneMoveDownIndex(columns[i]))
+                            moveMade = true;
+                        break;
+                    case MoveDirection.Left:
+                        while (MakeOneMoveDownIndex(rows[i]))
+                            moveMade = true;
+                        break;
+                }
+        }
         if (moveMade)
         {
             UpdateEmptyTiles();
