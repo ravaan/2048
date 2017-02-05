@@ -1,5 +1,5 @@
 5.6.0b1:2.8.0.0
-StandaloneWindows64
+Android
 C:/Program Files/Unity 5.6.0b1/Editor/Data/Managed/UnityEngine.dll
 C:/Program Files/Unity 5.6.0b1/Editor/Data/UnityExtensions/Unity/Advertisements/UnityEngine.Advertisements.dll
 C:/Program Files/Unity 5.6.0b1/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll
